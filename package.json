@@ -1,0 +1,30 @@
+{
+  "name": "@vyquocvu/braces",
+  "version": "0.1.0",
+  "description": "Fast, dependency-free, security-first brace expansion and compilation in TypeScript",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.cjs",
+    "bench": "npm run build && node benchmark/bench.cjs",
+    "prepack": "npm test"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "keywords": ["braces", "brace-expansion", "glob", "typescript", "security"]
+}
