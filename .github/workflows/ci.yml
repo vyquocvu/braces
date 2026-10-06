@@ -19,3 +19,16 @@ jobs:
           node-version: 22
       - run: npm install --ignore-scripts
       - run: npm test
+
+  compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --ignore-scripts
+      - name: Install upstream oracle only for differential testing
+        run: npm install --no-save --ignore-scripts braces-upstream@npm:braces@3.0.3
+      - run: npm run compat
