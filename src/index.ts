@@ -1,9 +1,14 @@
+import fillRange from "fill-range";
+
 export interface BracesOptions {
   expand?: boolean;
   nodupes?: boolean;
   noempty?: boolean;
   keepEscaping?: boolean;
   quantifiers?: boolean;
+  keepQuotes?: boolean;
+  escapeInvalid?: boolean;
+  transform?: (value: number, index: number) => string;
   maxLength?: number;
   maxDepth?: number;
   maxOutput?: number;
@@ -298,11 +303,49 @@ function cartesian(
 
 type EvalMode = "expand" | "compile";
 
-function isQuantifier(node: BraceNode): boolean {
-  if (node.parts.length !== 2) return false;
-  const a = rawSequence(node.parts[0]!);
-  const b = rawSequence(node.parts[1]!);
-  return a !== null && b !== null && /^\d+$/.test(a) && /^\d+$/.test(b);
+function rangeArgs(raw: string): [string, string, string?] | null {
+  const parts = raw.split("..");
+  if (parts.length !== 2 && parts.length !== 3) return null;
+  const [start, end, step] = parts;
+  if (start === undefined || end === undefined) return null;
+  return step === undefined ? [start, end] : [start, end, step];
+}
+
+function compileRange(raw: string, options: ResolvedOptions): string | null {
+  const args = rangeArgs(raw);
+  if (!args) return null;
+
+  const result = fillRange(args[0], args[1], args[2], {
+    ...options,
+    wrap: false,
+    toRegex: true,
+    strictZeros: true,
+  });
+
+  if (typeof result !== "string" || result.length === 0) return null;
+  return result.length > 1 ? `(${result})` : result;
+}
+
+function expandRange(raw: string, range: RangeSpec, options: ResolvedOptions): string[] {
+  const count = rangeCount(range);
+  if (options.rangeLimit !== false && count > options.rangeLimit) {
+    throw new RangeError(
+      `Range expands to ${count} values, exceeding rangeLimit ${options.rangeLimit}`,
+    );
+  }
+  if (count > options.maxOutput) {
+    throw new RangeError(
+      `Range expands to ${count} values, exceeding maxOutput ${options.maxOutput}`,
+    );
+  }
+
+  const args = rangeArgs(raw);
+  if (!args) return materializeRange(range, options);
+
+  const result = fillRange(args[0], args[1], args[2], options);
+  return Array.isArray(result) && result.length > 0
+    ? result.map(String)
+    : materializeRange(range, options);
 }
 
 function evaluate(
@@ -362,15 +405,16 @@ function evaluate(
     const range = raw === null ? null : parseRange(raw);
 
     if (range) {
-      const items = materializeRange(range, options);
-      values.set(node, mode === "expand" ? items : [`(${items.join("|")})`]);
-      continue;
-    }
-
-    if (options.quantifiers === true && isQuantifier(node)) {
-      const literal = `{${renderedParts.map((p) => p.join("")).join(",")}}`;
-      values.set(node, [literal]);
-      continue;
+      if (mode === "compile") {
+        const compiled = compileRange(raw!, options);
+        if (compiled !== null) {
+          values.set(node, [compiled]);
+          continue;
+        }
+      } else {
+        values.set(node, expandRange(raw!, range, options));
+        continue;
+      }
     }
 
     if (node.parts.length < 2) {
