@@ -1,9 +1,15 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const bracesModule = require("../dist/index.js");
-const braces = bracesModule.default;
+const braces = require("../dist/index.cjs");
 
-test("CommonJS require returns callable API", () => {\n  assert.equal(typeof braces, "function");\n  assert.equal(typeof braces.expand, "function");\n  assert.equal(typeof braces.compile, "function");\n  assert.deepEqual(braces("{a,b}", { expand: true }), ["a", "b"]);\n});\n\ntest("expands comma lists", () => {
+test("CommonJS require returns callable API", () => {
+  assert.equal(typeof braces, "function");
+  assert.equal(typeof braces.expand, "function");
+  assert.equal(typeof braces.compile, "function");
+  assert.deepEqual(braces("{a,b}", { expand: true }), ["a", "b"]);
+});
+
+test("expands comma lists", () => {
   assert.deepEqual(braces("a/{x,y,z}/b", { expand: true }), [
     "a/x/b",
     "a/y/b",
