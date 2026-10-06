@@ -13,7 +13,7 @@ export interface BracesOptions {
   maxDepth?: number;
   maxOutput?: number;
   maxNodes?: number;
-  rangeLimit?: number;
+  rangeLimit?: number | false;
 }
 
 export interface RootNode {
@@ -257,7 +257,7 @@ function formatNumber(value: number, width: number): string {
 
 function materializeRange(range: RangeSpec, options: ResolvedOptions): string[] {
   const count = rangeCount(range);
-  if (count > options.rangeLimit) {
+  if (options.rangeLimit !== false && count > options.rangeLimit) {
     throw new RangeError(
       `Range expands to ${count} values, exceeding rangeLimit ${options.rangeLimit}`,
     );
