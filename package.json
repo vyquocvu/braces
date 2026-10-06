@@ -13,7 +13,11 @@
       "default": "./dist/index.cjs"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=18"
   },
@@ -27,5 +31,14 @@
   "devDependencies": {
     "typescript": "^5.9.3"
   },
-  "keywords": ["braces", "brace-expansion", "glob", "typescript", "security"]
+  "keywords": [
+    "braces",
+    "brace-expansion",
+    "glob",
+    "typescript",
+    "security"
+  ],
+  "dependencies": {
+    "fill-range": "^7.1.1"
+  }
 }
