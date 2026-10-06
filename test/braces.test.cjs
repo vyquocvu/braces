@@ -61,9 +61,9 @@ test("supports noempty", () => {
   assert.deepEqual(braces.expand("{,a}", { noempty: true }), ["a"]);
 });
 
-test("preserves regex quantifiers when requested", () => {
+test("matches upstream 3.0.3 quantifiers behavior", () => {
   assert.deepEqual(braces("a/b{1,3}/{x,y}", { quantifiers: true }), [
-    "a/b{1,3}/(x|y)",
+    "a/b(1|3)/(x|y)",
   ]);
 });
 
